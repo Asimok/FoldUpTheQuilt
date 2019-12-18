@@ -88,15 +88,6 @@ public class BluetoothClientActivity extends Activity implements OnItemClickList
         // 为listView设置item点击事件侦听
         lvDevices.setOnItemClickListener(this);
 
-        // 用Set集合保持已绑定的设备   将绑定的设备添加到Set集合。
-        Set<BluetoothDevice> devices = mBluetoothAdapter.getBondedDevices();
-        if (devices.size() > 0) {
-            for (BluetoothDevice bluetoothDevice : devices) {
-                // 保存到arrayList集合中
-                bluetoothDevices.add(bluetoothDevice.getName() + ":"
-                        + bluetoothDevice.getAddress() + "\n");
-            }
-        }
 
         //注册找到设备和完成搜索广播
         IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
