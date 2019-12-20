@@ -22,17 +22,21 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 
 import com.example.foldupthequilt.tools.Codes;
 import com.example.foldupthequilt.tools.bluetooth_Pref;
+import com.example.foldupthequilt.tools.signdate;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -51,7 +55,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private bluetooth_Pref blue_sp;
     // 获取到蓝牙适配器
     public BluetoothAdapter mBluetoothAdapter;
-
+    private signdate date_sp;
+    private TextView tvflodstate;
+    private ImageView imgflodstate;
+    private SignCalendarReq signCalendarReq;
     private TextToSpeech texttospeech;
     public Button startgetweight, initweight, recycletrush, hazaroustrush;
 
@@ -68,6 +75,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        date_sp= signdate.getInstance(this);
+        date_sp.setSignDates("1,2,3");
+        tvflodstate=findViewById(R.id.flodstate);
+        imgflodstate=findViewById(R.id.imgflodstate);
+
         tv_recive = findViewById(R.id.tvrecive);
         tvBandBluetooth = (TextView) findViewById(R.id.tvBandBluetooth);
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -96,6 +109,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
     }
+private void autoSign() {
+    Log.e("cc1","auto");
+
+    if (!date_sp.getSignDates().contains(String.valueOf(Calendar.getInstance().get(Calendar.DAY_OF_MONTH)))) {
+        date_sp.setSignDates(date_sp.getSignDates() + "," + Calendar.getInstance().get(Calendar.DAY_OF_MONTH));
+        Message msg = new Message();
+       Log.e("cc1","auto1");
+        msg.obj = "toast";
+        handler.sendMessage(msg);
+
+    }
+}
+
+
+
+
+
 
 
     //右上角三个点
@@ -219,11 +249,36 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            // TODO Auto-generated method stub
+
             super.handleMessage(msg);
+            Log.e("cc1","收到 "+(String)msg.obj);
 
-            tv_recive.setText((String) msg.obj);
+            if (((String)msg.obj).contains("toast"))
+            {
+                Log.e("cc","tttttttttttttttt");
+                Toast.makeText(MainActivity.this, "已为您自动签到", Toast.LENGTH_SHORT).show();
+            }
+            else
+            { tv_recive.setText((String) msg.obj);
+                if (tv_recive.getText().toString().length()>2)
+                {
+                    String nowWeight=tv_recive.getText().toString();
+                    Log.e("cc",String.valueOf(nowWeight.length()));
+                    if(nowWeight.length()<8&&nowWeight.length()>3) {
+                        Log.e("cc",nowWeight.substring(0,nowWeight.indexOf("g")-1));
+                        if (Integer.parseInt((nowWeight.substring(0,nowWeight.indexOf("g")-1)))> 1000) {
+                            autoSign();
+                            tvflodstate.setText("已叠被");
+                            imgflodstate.setImageDrawable(getResources().getDrawable(R.drawable.flod));
+                        }
+                        else
+                        {
+                            tvflodstate.setText("未叠被");
+                            imgflodstate.setImageDrawable(getResources().getDrawable(R.drawable.unflod));
+                        }
 
+                    }
+                }}
 
 
         }
@@ -236,14 +291,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 try {
                     if (bldrytrush) {
                         send(blue_sp.getBluetoothAd(), Codes.openDryTrush);
-                        startgetweight.setBackgroundColor(Color.GRAY);
+                        startgetweight.setBackgroundResource(R.drawable.btn_close);
                         startgetweight.setText("关闭");
                         bldrytrush = false;
                     } else {
                         startgetweight.setText("开启");
 
                         send(blue_sp.getBluetoothAd(), Codes.closeDryTrush);
-                        startgetweight.setBackgroundColor(Color.parseColor("#4CAF50"));
+                        startgetweight.setBackgroundResource(R.drawable.btn_open);
                         bldrytrush = true;
                     }
 

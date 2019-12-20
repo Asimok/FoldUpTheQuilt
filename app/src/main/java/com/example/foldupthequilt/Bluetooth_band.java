@@ -21,6 +21,7 @@ import android.widget.Toast;
 
 
 import com.example.foldupthequilt.tools.bluetooth_Pref;
+import com.example.foldupthequilt.tools.signdate;
 
 import java.util.ArrayList;
 import java.util.Formatter;
@@ -112,6 +113,7 @@ public class Bluetooth_band extends Activity implements OnItemClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout_buletooth_band);
         blue_sp = bluetooth_Pref.getInstance(this);
+
         select = (TextView) findViewById(R.id.select);
         initBluetooth();
         getPremession();//获取虚拟定位权限
